@@ -1,0 +1,19 @@
+with use Syren;
+with use IO = Syren.IO;
+
+fn Main
+{
+    try
+    {
+        use Streams = IO.Streams;
+        let range = r[0, 12];
+        let target = Random.FromRange(range);
+        while(let guess = int.TryParse(IO.ReadLine())? in number != guess)
+            IO.Puts(string.trimMultiline! $"
+                |{guess} is not correct.
+                |Enter a number between {range.Minimum} and {range.Maxmimum} (inclusive).
+            ");
+        IO.Puts("You guessed right!");
+    } except(IOError _)
+        IO.Puts(Streams.Error, "Failed to read line.");
+}

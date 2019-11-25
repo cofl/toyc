@@ -1,0 +1,4 @@
+with use IO = System.IO;
+
+fn Main
+    IO.Puts("Hello, World!);

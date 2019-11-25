@@ -1,0 +1,15 @@
+with use IO = System.IO;
+
+fn Main
+{
+    IO.Print("Who are you? ");
+    let n = IO.ReadLine();
+    IO.Puts("Hello, {}!", n);
+}
+
+// or
+
+fn Main
+    let _ = IO.Print("Who are you? "),
+        n = IO.ReadLine()
+    in IO.Puts($"Hello, {n}!");

@@ -1,0 +1,10 @@
+with use Syren.IO;
+
+private fn factorial(0, acc) acc;
+private fn factorial(n: u32, acc) factorial(n - 1, acc * n);
+
+fn factorial(0) factorial(0, 1);
+fn factorial(n: u32) factorial(n - 1, n);
+
+fn Main
+    Puts(factorial(5));
