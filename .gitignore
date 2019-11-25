@@ -1,12 +1,2 @@
-.ionide/
-.paket/paket.exe
-paket-files/
-**/packages/*
-//!**/packages/build/
-
-.fake/
-
-[Oo]bj/
-[Bb]in/
-[Rr]elease/
-[Dd]ebug/
+/target
+**/*.rs.bk
