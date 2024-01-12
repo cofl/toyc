@@ -1,3 +1,14 @@
 {
-    "ada.projectFile": "toyc.gpr"
+    "ada.projectFile": "toyc.gpr",
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "alire": true,
+        //"config": true,
+        "obj": true,
+    }
 }

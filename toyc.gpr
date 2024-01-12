@@ -9,6 +9,7 @@ project Toyc is
 
    package Compiler is
       for Default_Switches ("Ada") use Toyc_Config.Ada_Compiler_Switches;
+      for Switches ("Ada") use ("-gnatW8");
    end Compiler;
 
    package Binder is
