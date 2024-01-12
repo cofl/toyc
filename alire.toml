@@ -1,0 +1,9 @@
+name = "toyc"
+description = "Shiny new project"
+version = "0.1.0-dev"
+
+authors = ["cofl"]
+maintainers = ["cofl <cllacour@mtu.edu>"]
+maintainers-logins = ["cofl"]
+
+executables = ["toyc"]

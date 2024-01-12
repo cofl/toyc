@@ -1,0 +1,14 @@
+{
+    "name": "Toy",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "AdaCore.ada",
+                "EditorConfig.EditorConfig"
+            ]
+        }
+    }
+}
