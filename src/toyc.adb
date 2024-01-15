@@ -1,4 +1,5 @@
 with Ada.Text_IO;
+with Ada.Text_IO.Unbounded_IO;
 with Ada.Command_Line;
 with Lexer;
 with Scanner;
@@ -30,7 +31,9 @@ begin
       else
          IO.Put ("   | ");
       end if;
-      IO.Put_Line (Token.Category'Image);
+      IO.Put (Token.Category'Image);
+      IO.Put (": ");
+      IO.Unbounded_IO.Put_Line (Token.Text);
 
       exit when Token.Category = Lexer.End_Of_File;
    end loop;
