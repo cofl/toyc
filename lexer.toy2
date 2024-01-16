@@ -1,0 +1,38 @@
+module Demo {
+    type Token = variant record
+    when No_Value =>
+        End_Of_File,
+        Error,
+        Left_Parenthesis,
+        Right_Parenthesis,
+        Minus,
+        Plus,
+        Slash,
+        Star {}
+    when String_Value=>
+        Number,
+        Symbol,
+        Comment
+        {
+            Text : String;
+        }
+    with
+        Stop_State: Error, End_Of_File;
+        Operator:
+            Minus,
+            Plus,
+            Star,
+            Slash;
+    {
+        Line : Natural;
+    };
+
+    fn Put(token: Token){
+        case Token {
+            Token.No_Value(let Line) =>
+                Put(Line);
+            Token.String_Value(let Line; let Text) =>
+                Put(Line.Image + ": " + Text);
+        }
+    }
+}

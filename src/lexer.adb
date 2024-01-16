@@ -11,20 +11,20 @@ package body Lexer is
       Scanner.Mark;
       C := Scanner.Next;
       if Scanner.End_Of_File then
-         return Token'(Category => End_Of_File, Line => Scanner.Line, Text => Scanner.Value);
+         return End_Of_File_Token'(Category => End_Of_File, Line => Scanner.Line);
       end if;
       return (case C is
-         when '+' => Token'(Category => Plus, Line => Scanner.Line, Text => Scanner.Value),
+         when '+' => Plus_Token'(Category => Plus, Line => Scanner.Line),
          when '-' => (if Scanner.Match('-') then
                Line_Comment
             else
-               Token'(Category => Minus, Line => Scanner.Line, Text => Scanner.Value)),
-         when '*' => Token'(Category => Star, Line => Scanner.Line, Text => Scanner.Value),
-         when '/' => Token'(Category => Slash, Line => Scanner.Line, Text => Scanner.Value),
-         when '(' => Token'(Category => Left_Parenthesis, Line => Scanner.Line, Text => Scanner.Value),
-         when ')' => Token'(Category => Right_Parenthesis, Line => Scanner.Line, Text => Scanner.Value),
+               Minus_Token'(Category => Minus, Line => Scanner.Line)),
+         when '*' => Star_Token'(Category => Star, Line => Scanner.Line),
+         when '/' => Slash_Token'(Category => Slash, Line => Scanner.Line),
+         when '(' => Left_Parenthesis_Token'(Category => Left_Parenthesis, Line => Scanner.Line),
+         when ')' => Right_Parenthesis_Token'(Category => Right_Parenthesis, Line => Scanner.Line),
          when Digit => Number,
-         when others => Token'(Category => Error, Line => Scanner.Line, Text => Scanner.Value));
+         when others => Error_Token'(Category => Error, Line => Scanner.Line, Text => Scanner.Value));
    end Next;
 
    function Number return Token is
@@ -32,7 +32,7 @@ package body Lexer is
       while Scanner.Peek in Digit loop
          Scanner.Advance;
       end loop;
-      return Token'
+      return Number_Token'
         (Category => Number,
          Line => Scanner.Line,
          Text => Scanner.Value);
@@ -47,7 +47,7 @@ package body Lexer is
       while not Is_Block_Whitespace (Peek) loop
          Advance;
       end loop;
-      return Token'
+      return Comment_Token'
         (Category => Comment,
          Line => Line,
          Text => Value);

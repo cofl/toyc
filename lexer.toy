@@ -1,0 +1,42 @@
+package Demo is
+    type Token is variant record
+    when No_Value of
+        End_Of_File,
+        Error,
+        Left_Parenthesis,
+        Right_Parenthesis,
+        Minus,
+        Plus,
+        Slash,
+        Star, =>
+            null;
+    when String_Value of
+        Number,
+        Symbol,
+        Comment, =>
+            Text : String;
+    with
+        Stop_State of
+            Error,
+            End_Of_File;
+        Operator of
+            Minus,
+            Plus,
+            Slash,
+            Star;
+    begin
+        Line : Natural;
+    end record;
+
+    procedure Put (Token : Token);
+begin
+    procedure Put (Token : Token) is
+    begin
+        case Token is
+        when Token.No_Value(let Line) =>
+            Put (Line);
+        when Token.String_Value(let Line; let Text) =>
+            Put (Line'Image & ": " & Text);
+        end case;
+    end;
+end;

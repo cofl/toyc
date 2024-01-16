@@ -13,6 +13,18 @@ procedure Toyc is
 
    Token : Lexer.Token;
    Line  : Natural := 0;
+
+   procedure Put_Token (Item : Lexer.Token) is
+      use IO;
+      use IO.Unbounded_IO;
+      use Lexer;
+   begin
+      Put (Token.Category'Image);
+      if Token.Category in Number | Symbol | Comment | Error then
+         Put (": ");
+         Put (Token.Text);
+      end if;
+   end Put_Token;
 begin
    if CLI.Argument_Count /= 1 then
       IO.Put_Line (Item => "Usage: toyc <file>", File => IO.Standard_Error);
@@ -31,9 +43,8 @@ begin
       else
          IO.Put ("   | ");
       end if;
-      IO.Put (Token.Category'Image);
-      IO.Put (": ");
-      IO.Unbounded_IO.Put_Line (Token.Text);
+      Put_Token (Token);
+      IO.New_Line;
 
       exit when Token.Category = Lexer.End_Of_File;
    end loop;
