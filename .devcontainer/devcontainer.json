@@ -7,8 +7,18 @@
         "vscode": {
             "extensions": [
                 "AdaCore.ada",
-                "EditorConfig.EditorConfig"
+                "EditorConfig.EditorConfig",
+                "mike-lischke.vscode-antlr4"
             ]
+        }
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/java:1": {
+            "version": "latest",
+            "jdkDistro": "ms",
+            "gradleVersion": "latest",
+            "mavenVersion": "latest",
+            "antVersion": "latest"
         }
     }
 }

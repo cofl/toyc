@@ -1,52 +1,47 @@
-with Ada.Text_IO;
-with Ada.Text_IO.Unbounded_IO;
-with Ada.Command_Line;
-with Lexer;
+with Ada.Text_IO;              use Ada.Text_IO;
+with Ada.Text_IO.Unbounded_IO; use Ada.Text_IO.Unbounded_IO;
+with Ada.Command_Line;         use Ada.Command_Line;
+with Lexer;                    use Lexer;
 with Scanner;
 
 procedure Toyc is
-   package IO renames Ada.Text_IO;
-   package CLI renames Ada.Command_Line;
+   package Natural_IO is new Integer_IO (Natural);
+   use Natural_IO;
 
-   package Natural_IO is new IO.Integer_IO (Natural);
-   use type Lexer.Token_Type;
+   Item : Lexer.Token;
+   Line : Natural := 0;
 
-   Token : Lexer.Token;
-   Line  : Natural := 0;
-
-   procedure Put_Token (Item : Lexer.Token) is
-      use IO;
-      use IO.Unbounded_IO;
-      use Lexer;
+   procedure Put_Token is
    begin
-      Put (Token.Category'Image);
-      if Token.Category in Number | Symbol | Comment | Error then
+      Put (Item.Kind'Image);
+      if Item.Kind in Number | Symbol | Comment | Error then
          Put (": ");
-         Put (Token.Text);
+         Put (Item.Text);
       end if;
    end Put_Token;
 begin
-   if CLI.Argument_Count /= 1 then
-      IO.Put_Line (Item => "Usage: toyc <file>", File => IO.Standard_Error);
-      CLI.Set_Exit_Status (Code => CLI.Failure);
+   if Argument_Count /= 1 then
+      Put_Line (Item => "Usage: toyc <file>", File => Standard_Error);
+      Set_Exit_Status (Code => Failure);
       return;
    end if;
 
-   Scanner.Open (CLI.Argument (1));
+   Scanner.Open (Argument (1));
    loop
-      Token := Lexer.Next;
+      Item := Next;
 
-      if Line /= Token.Line then
-         Line := Token.Line;
-         Natural_IO.Put (Item => Line, Width => 4);
-         IO.Put (" ");
+      if Line /= Item.Line then
+         Line := Item.Line;
+
+         Put (Item => Line, Width => 4);
+         Put (" ");
       else
-         IO.Put ("   | ");
+         Put ("   | ");
       end if;
-      Put_Token (Token);
-      IO.New_Line;
+      Put_Token;
+      New_Line;
 
-      exit when Token.Category = Lexer.End_Of_File;
+      exit when Item.Kind = Lexer.End_Of_File;
    end loop;
    Scanner.Close;
 end Toyc;

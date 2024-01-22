@@ -1,5 +1,6 @@
 with Ada.Text_IO;             use Ada.Text_IO;
 with Ada.Strings.Unbounded;   use Ada.Strings.Unbounded;
+with Ada.Sequential_IO;
 
 package Scanner is
    type Whitespace_Kind is (Inline_Whitespace, Block_Whitespace, Any_Whitespace);
@@ -23,7 +24,10 @@ package Scanner is
 
    function Is_Block_Whitespace (C : Character) return Boolean;
 private
-   File : File_Type;
+   package IO is new Ada.Sequential_IO (Character);
+   procedure Read (Item : out Character);
+
+   File : IO.File_Type;
    Current_Character, Next_Character : Character;
    Current_Line, Current_Column : Positive := 1;
 

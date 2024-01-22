@@ -40,3 +40,14 @@ begin
         end case;
     end;
 end;
+
+package File_IO is
+    type File is private linear[Open | Closed];
+    function Open (Path: String; Mode: IO_Mode) returns File[Open];
+    procedure Close(file: File[Open -> Closed]);
+    procedure Write(file: File[Open]; buffer: Buffer);
+private
+    type File[File_State] is record
+        Handle : Integer;
+    end record;
+end File_IO;

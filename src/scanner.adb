@@ -3,8 +3,17 @@ with Ada.Characters.Latin_1;
 with Ada.Strings.Unbounded;
 
 package body Scanner is
-   package IO renames Ada.Text_IO;
    package Characters renames Ada.Characters.Latin_1;
+
+   procedure Read (Item : out Character) is
+      use IO;
+   begin
+      if End_Of_File (File) then
+         Item := Characters.NUL;
+      else
+         Read (File, Item);
+      end if;
+   end Read;
 
    procedure Open (Path : String) is
    begin
@@ -12,16 +21,8 @@ package body Scanner is
         (File => File,
          Mode => IO.In_File,
          Name => Path);
-      if not IO.End_Of_File (File) then
-         IO.Get_Immediate (File => File, Item => Current_Character);
-      else
-         Current_Character := Characters.NUL;
-      end if;
-      if not IO.End_Of_File (File) then
-         IO.Get_Immediate (File => File, Item => Next_Character);
-      else
-         Next_Character := Characters.NUL;
-      end if;
+      Read (Current_Character);
+      Read (Next_Character);
    end Open;
 
    procedure Close is
@@ -33,7 +34,7 @@ package body Scanner is
       use Ada.Strings.Unbounded;
    begin
       if Current_Character = Characters.LF then
-         Current_Line := Current_Line + 1;
+         Current_Line   := Current_Line + 1;
          Current_Column := 1;
       else
          Current_Column := Current_Column + 1;
@@ -44,11 +45,7 @@ package body Scanner is
       end if;
 
       Current_Character := Next_Character;
-      if not IO.End_Of_File (File) then
-         IO.Get_Immediate (File => File, Item => Next_Character);
-      else
-         Next_Character := Characters.NUL;
-      end if;
+      Read (Next_Character);
    end Advance;
 
    procedure Skip_Whitespace (Kind : Whitespace_Kind := Any_Whitespace) is

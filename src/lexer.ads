@@ -3,16 +3,17 @@ with Ada.Strings.Unbounded;
 use Ada.Strings.Unbounded;
 
 package Lexer is
-   type Token_Type is (
+   type Token_Kind is (
       End_Of_File, Error,
       Left_Parenthesis, Right_Parenthesis,
       Minus, Plus, Slash, Star,
       Number, Symbol,
       Comment
    );
-   type Token (Category : Token_Type := Error) is record
-      Line     : Natural;
-      case Category is
+
+   type Token (Kind : Token_Kind := Error) is record
+      Line : Natural;
+      case Kind is
       when Number | Symbol | Comment | Error =>
          Text     : Unbounded_String;
       when others =>

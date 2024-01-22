@@ -1,6 +1,7 @@
-module Demo {
-    type Token = variant record
-    when No_Value =>
+package Demo is
+    type Token is enum record
+        Line : Natural
+    with No_Value of
         End_Of_File,
         Error,
         Left_Parenthesis,
@@ -8,31 +9,37 @@ module Demo {
         Minus,
         Plus,
         Slash,
-        Star {}
-    when String_Value=>
+        Star =>
+            null;
+    with String_Value of
         Number,
         Symbol,
-        Comment
-        {
+        Comment =>
             Text : String;
-        }
-    with
-        Stop_State: Error, End_Of_File;
-        Operator:
-            Minus,
-            Plus,
-            Star,
-            Slash;
-    {
-        Line : Natural;
-    };
+    with Stop_State of
+        Error,
+        End_Of_File;
+    with Operator of
+        Minus,
+        Plus,
+        Slash,
+        Star;
+    end record;
 
-    fn Put(token: Token){
-        case Token {
-            Token.No_Value(let Line) =>
-                Put(Line);
-            Token.String_Value(let Line; let Text) =>
-                Put(Line.Image + ": " + Text);
-        }
-    }
-}
+    procedure Put (Token : Token);
+end;
+
+use type Optional[T] is enum record
+    with Some => Value : T;
+    with None;
+    where T : not void;
+end record;
+
+function Get_User(ID : String) returns Optional[User];
+
+let User := Get_User(ID);
+case User is
+    when Some(Value => (Name => let Name)) => Name;
+    when Some(Value => let User) => User.Name; --  duplicate case
+    when others => "";
+end case;
