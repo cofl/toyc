@@ -5,6 +5,7 @@
 
 enum Token_Kind {
     TOKEN_ERROR = 0,
+    
     TOKEN_LPAREN,
     TOKEN_RPAREN,
     TOKEN_LBRACE,
@@ -23,10 +24,11 @@ enum Token_Kind {
     TOKEN_GREATER,
     TOKEN_GREATER_EQUAL,
     TOKEN_LESS,
-    TOKEN_LESS_EEQUAL,
+    TOKEN_LESS_EQUAL,
     TOKEN_IDENTIFIER,
     TOKEN_STRING,
     TOKEN_NUMBER,
+    
     TOKEN_AND,
     TOKEN_CLASS,
     TOKEN_ELSE,
@@ -42,41 +44,21 @@ enum Token_Kind {
     TOKEN_THIS,
     TOKEN_TRUE,
     TOKEN_VAR,
+    
     TOKEN_EOF = -1,
 };
 
-struct Any_Token {
+typedef struct Token {
     enum Token_Kind Kind;
     struct Position Position;
-};
-typedef struct Any_Token *Any_Token_Ptr;
-
-struct Text_Token {
-    struct Any_Token Base;
-    struct String Text;
-};
-typedef struct Text_Token *Text_Token_Ptr;
-
-struct Number_Token {
-    struct Any_Token Base;
-    double Value;
-};
-typedef struct Number_Token *Number_Token_Ptr;
-
-struct Error_Token {
-    struct Any_Token Base;
-    struct Position Error_Position;
-    struct String Message;
-};
-typedef struct Error_Token *Error_Token_Ptr;
-
-union Token {
-    struct Any_Token Token;
-    struct Text_Token Text_Token;
-    struct Error_Token Error_Token;
-    struct Number_Token Number_Token;
-};
-
-typedef union Token Token, *Token_Ptr;
+    union {
+        struct String Text_Value;
+        double Double_Value;
+        struct {
+            struct String Message;
+            struct Position End_Position;
+        } Error_Value;
+    };
+} Token, *Token_Ptr;
 
 #endif

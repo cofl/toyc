@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "*.h": "c",
+    },
+    "mesonbuild.buildFolder": ".build",
+    "C_Cpp.default.compileCommands": "/home/cofl/repos/toyc/.build/compile_commands.json",
+    "C_Cpp.default.configurationProvider": "mesonbuild.mesonbuild",
+    "[c]": {
+        "editor.inlayHints.enabled": "off"
+    }
+}

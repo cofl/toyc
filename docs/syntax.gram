@@ -1,0 +1,26 @@
+Procedure_Definition = "procedure" Identifier Procedure_Definition_Suffix
+Procedure_Definition_Suffix =
+    | Parameter_List Partial_Block
+    | Partial_Block
+Function_Definition = "function" Identifier Function_Definition_Suffix
+Function_Definition_Suffix =
+    | Parameter_List "returns" Type Partial_Block
+    | "returns" Type Partial_Block
+Identifier = `` a sequence of one or more legal characters, which does not match the pattern /\d+(_\d+)*/ ``
+Parameter_List = "(" Parameter_List_Suffix
+Parameter_List_Suffix =
+    | ")"
+    | Parameter ")"
+    | Parameter "," Parameter_List_Suffix
+Parameter = Identifier_List ":" Parameter_Suffix
+Identifier_List = Identifier { "," 
+}
+    | Identifier
+    | Identifier "," Identifier_List
+Parameter_Suffix =
+    | Parameter_Mode_List Type
+    | Type
+Parameter_Mode_List =
+    | Parameter_Mode
+    | Parameter_Mode Parameter_Mode_List
+Parameter_Mode = "in" | "out" | "ref" | "const"

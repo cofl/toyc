@@ -1,0 +1,10 @@
+/*
+    This is a sample file.
+    /* nested comment */
+*/
+var variable = 1;
+var b = 2;
+if(a > b){
+    print "\x0061 > b";
+    return true;
+}

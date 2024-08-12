@@ -1,7 +1,7 @@
-#include<stdlib.h>
-#include<string.h>
-#include<stdbool.h>
 #include "String.h"
+#include<stdlib.h>
+#include<stdbool.h>
+#include<string.h>
 
 void New_String(const String_Ptr string){
     string->Size = 0;
@@ -11,7 +11,7 @@ void New_String(const String_Ptr string){
     string->Managed_Buffer = true;
 }
 
-void New_Fixed_String(const String_Ptr string, size_t size, const char buffer[size]){
+void New_Fixed_String(const String_Ptr string, size_t size, char buffer[size]){
     string->Size = 0;
     string->Buffer_Size = size;
     string->Content = buffer;
@@ -33,7 +33,7 @@ static void Extend_Buffer(const String_Ptr string, size_t new_size){
         string->Managed_Buffer = true;
         
         let temp = talloc(char, string->Buffer_Size);
-        strncpy(temp, string->Size, string->Content);
+        strncpy(temp, string->Content, string->Size);
         string->Content = temp;
     }
 }

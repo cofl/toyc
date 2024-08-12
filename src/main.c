@@ -27,8 +27,8 @@ void Run_Prompt(){
     bool result;
     do {
         result = Next_Token(&token);
-        #define PrintToken(kind) case kind: printf("%s (%d, %d)\n", #kind, token.Token.Position.Line, token.Token.Position.Column); break;
-        switch (token.Token.Kind){
+        #define PrintToken(kind) case kind: printf("%s (%d, %d)\n", #kind, token.Position.Line, token.Position.Column); break;
+        switch (token.Kind){
             PrintToken(TOKEN_LPAREN);
             PrintToken(TOKEN_RPAREN);
             PrintToken(TOKEN_LBRACE);
@@ -47,8 +47,7 @@ void Run_Prompt(){
             PrintToken(TOKEN_GREATER);
             PrintToken(TOKEN_GREATER_EQUAL);
             PrintToken(TOKEN_LESS);
-            PrintToken(TOKEN_LESS_EEQUAL);
-            PrintToken(TOKEN_IDENTIFIER);
+            PrintToken(TOKEN_LESS_EQUAL);
             PrintToken(TOKEN_AND);
             PrintToken(TOKEN_CLASS);
             PrintToken(TOKEN_ELSE);
@@ -65,21 +64,26 @@ void Run_Prompt(){
             PrintToken(TOKEN_TRUE);
             PrintToken(TOKEN_VAR);
             PrintToken(TOKEN_EOF);
+            case TOKEN_IDENTIFIER:
+                printf("TOKEN_IDENTIFIER (%d, %d) %s\n",
+                    token.Position.Line, token.Position.Column,
+                    token.Text_Value.Content);
+                break;
             case TOKEN_STRING:
                 printf("TOKEN_STRING (%d, %d) \"%s\"\n",
-                    token.Token.Position.Line, token.Token.Position.Column,
-                    token.Text_Token.Text.Content);
+                    token.Position.Line, token.Position.Column,
+                    token.Text_Value.Content);
                 break;
             case TOKEN_NUMBER:
                 printf("TOKEN_NUMBER (%d, %d): %lf\n",
-                    token.Token.Position.Line, token.Token.Position.Column,
-                    token.Number_Token.Value);
+                    token.Position.Line, token.Position.Column,
+                    token.Double_Value);
                 break;
             case TOKEN_ERROR:
                 printf("TOKEN_ERROR (%d, %d)-(%d, %d): %s\n",
-                    token.Token.Position.Line, token.Token.Position.Column,
-                    token.Error_Token.Error_Position.Line, token.Error_Token.Error_Position.Column,
-                    token.Error_Token.Message.Content);
+                    token.Position.Line, token.Position.Column,
+                    token.Error_Value.End_Position.Line, token.Error_Value.End_Position.Column,
+                    token.Error_Value.Message.Content);
                 break;
         }
         #undef PrintToken

@@ -1,6 +1,5 @@
 #include <unistd.h>
 #include <fcntl.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -105,6 +104,14 @@ static bool Match_Character(Code_Point character){
     return true;
 }
 
+static bool Match_Character_Append(Code_Point character, const String_Ptr string){
+    if(Match_Character(character)){
+        Append_Char(string, character);
+        return true;
+    }
+    return false;
+}
+
 static bool Match_Character_Range(Code_Point from, Code_Point to, Code_Point *character){
     if(End_Of_File() || from == EOF || to == EOF || from > to)
         return false;
@@ -128,11 +135,34 @@ static bool Is_Alphabetic(Code_Point character){
         || (character >= 'a' && character <= 'z');
 }
 
+static bool Match_Character_Ident(Code_Point *character){
+    if(End_Of_File())
+        return false;
+    let peek = Peek_Character();
+    if(!Is_Alphabetic(peek) && !Is_Numeric(peek) && peek != '_')
+        return false;
+    
+    if(NULL != character)
+        *character = Next_Character();
+    else
+        Next_Character();
+    return true;
+}
+
+static bool Match_Character_Ident_Append(const String_Ptr string){
+    Code_Point c;
+    if(Match_Character_Ident(&c)){
+        Append_Char(string, c);
+        return true;
+    }
+    return false;
+}
+
 static bool Error_Token(const Token_Ptr token, struct Position position, const String_Ptr message){
-    token->Token.Kind = TOKEN_ERROR;
-    token->Token.Position = position;
-    token->Error_Token.Error_Position = File_Position;
-    Move_String(&token->Error_Token.Message, message);
+    token->Kind = TOKEN_ERROR;
+    token->Position = position;
+    token->Error_Value.End_Position = File_Position;
+    Move_String(&token->Error_Value.Message, message);
     return false;
 }
 
@@ -147,19 +177,41 @@ static bool Format_Error(const Token_Ptr token, struct Position position, const 
 }
 
 static bool Simple_Token(const Token_Ptr token, struct Position position, enum Token_Kind kind){
-    token->Token.Kind = kind;
-    token->Token.Position = position;
+    token->Kind = kind;
+    token->Position = position;
     return true;
 }
 
 static void Line_Comment(){
-    New_String(&Extent_String);
-    Append_Text(&Extent_String, 2, "//");
+    New_String_Text_Lit(&Extent_String, "//");
     while(!Match_Character('\n') && !Match_Character(EOF)){
         let current = Next_Character();
         Append_Char(&Extent_String, current);
     }
     printf("Line Comment: \"%s\"\n", Extent_String.Content);
+    Free_String(&Extent_String);
+}
+
+static void Block_Comment(){
+    New_String_Text_Lit(&Extent_String, "/*");
+    
+    let depth = 1;
+    while(depth > 0){
+        if(Match_Character_Append('/', &Extent_String)){
+            if(Match_Character_Append('*', &Extent_String)){
+                depth += 1;
+            }
+        } else if(Match_Character_Append('*', &Extent_String)){
+            if(Match_Character_Append('/', &Extent_String)){
+                depth -= 1;
+            }
+        } else {
+            let current = Next_Character();
+            Append_Char(&Extent_String, current);
+        }
+    }
+
+    printf("Block comment: \"%s\"\n", Extent_String.Content);
     Free_String(&Extent_String);
 }
 
@@ -266,10 +318,9 @@ static bool String_Token(const Token_Ptr token, struct Position position){
     }
 
     done:;
-    let _token = (Text_Token_Ptr) token;
-    _token->Base.Kind = TOKEN_STRING;
-    _token->Base.Position = position;
-    Move_String(&_token->Text, &Extent_String);
+    token->Kind = TOKEN_STRING;
+    token->Position = position;
+    Move_String(&token->Text_Value, &Extent_String);
     return true;
 }
 
@@ -281,16 +332,26 @@ static bool Number_Token(const Token_Ptr token, struct Position position, Code_P
         Append_Char(&Extent_String, current);
     }
 
-    if(Match_Character('.')){
-        Append_Char(&Extent_String, '.');
+    if(Match_Character_Append('.', &Extent_String)){
         while(Match_Character_Range('0', '9', &current)){
             Append_Char(&Extent_String, current);
         }
     }
 
-    token->Token.Kind = TOKEN_NUMBER;
-    token->Token.Position = position;
-    token->Number_Token.Value = atof(Extent_String.Content);
+    token->Kind = TOKEN_NUMBER;
+    token->Position = position;
+    token->Double_Value = atof(Extent_String.Content);
+    Free_String(&Extent_String);
+    return true;
+}
+
+static bool Try_String_Identifier(const Token_Ptr token, size_t size, const char rest[size], enum Token_Kind kind){
+    for(let i = 0; i < (size - 1) && rest[i]; i += 1)
+        if(!Match_Character_Append(rest[i], &Extent_String))
+            return false;
+    if(Match_Character_Ident_Append(&Extent_String))
+        return false;
+    token->Kind = kind;
     Free_String(&Extent_String);
     return true;
 }
@@ -298,6 +359,56 @@ static bool Number_Token(const Token_Ptr token, struct Position position, Code_P
 static bool Text_Token(const Token_Ptr token, struct Position position, Code_Point current){
     New_String(&Extent_String);
     Append_Char(&Extent_String, current);
+    token->Position = position;
+    #define Try_String(a, k) if(!Try_String_Identifier(token, sizeof(a), (a), (k))) goto ident;
+    switch (current){
+        case 'a': Try_String("nd", TOKEN_AND); return true;
+        case 'c': Try_String("lass", TOKEN_CLASS); return true;
+        case 'e': Try_String("lse", TOKEN_ELSE); return true;
+        case 'f':
+            if(Match_Character_Append('u', &Extent_String)){
+                Try_String("n", TOKEN_FUN);
+                return true;
+            }
+            if(Match_Character_Append('o', &Extent_String)){
+                Try_String("r", TOKEN_FOR);
+                return true;
+            }
+            if(Match_Character_Append('a', &Extent_String)){
+                Try_String("lse", TOKEN_FALSE);
+                return true;
+            }
+            goto ident;
+        case 'i': Try_String("f", TOKEN_IF); return true;
+        case 'n': Try_String("il", TOKEN_NIL); return true;
+        case 'o': Try_String("r", TOKEN_OR); return true;
+        case 'p': Try_String("rint", TOKEN_PRINT); return true;
+        case 'r': Try_String("eturn", TOKEN_RETURN); return true;
+        case 's': Try_String("uper", TOKEN_SUPER); return true;
+        case 't':
+            if(Match_Character_Append('h', &Extent_String)){
+                Try_String("is", TOKEN_THIS);
+                return true;
+            }
+            if(Match_Character_Append('r', &Extent_String)){
+                Try_String("ue", TOKEN_TRUE);
+                return true;
+            }
+            goto ident;
+        case 'v': Try_String("ar", TOKEN_VAR); return true;
+        default:
+            goto ident;
+    }
+    #undef Try_String
+
+    ident:;
+    while(Match_Character_Ident(&current)){
+        Append_Char(&Extent_String, current);
+    }
+
+    token->Kind = TOKEN_IDENTIFIER;
+    Move_String(&token->Text_Value, &Extent_String);
+    return true;
 }
 
 bool Next_Token (const Token_Ptr token) {
@@ -332,25 +443,27 @@ bool Next_Token (const Token_Ptr token) {
                 return Simple_Token(token, position, TOKEN_EQUAL);
             case '<':
                 if(Match_Character('='))
-                    return Simple_Token(token, position, TOKEN_LESS_EEQUAL);
+                    return Simple_Token(token, position, TOKEN_LESS_EQUAL);
                 return Simple_Token(token, position, TOKEN_LESS);
             case '>':
                 if(Match_Character('='))
                     return Simple_Token(token, position, TOKEN_GREATER_EQUAL);
                 return Simple_Token(token, position, TOKEN_GREATER);
             case '/':
-                if(!Match_Character('/'))
+                if(Match_Character('/'))
+                    Line_Comment();
+                else if(Match_Character('*'))
+                    Block_Comment();
+                else
                     return Simple_Token(token, position, TOKEN_SLASH);
-                Line_Comment();
                 continue;
             case '\n': case ' ': case '\r': case '\t':
                 continue;
-            case '0': case '1': case '2': case '3': case '4':
-            case '5': case '6': case '7': case '8': case '9':
-                return Number_Token(token, position, current);
             default:
-                if(Is_Alphabetic(current))
-                    return true; // TODO
+                if(Is_Numeric(current))
+                    return Number_Token(token, position, current);
+                if(Is_Alphabetic(current) || current == '_')
+                    return Text_Token(token, position, current);
                 return Format_Error(token, position, "Unrecognized character: %c (%d)", current, current);
         }
     }
